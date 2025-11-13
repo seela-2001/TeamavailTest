@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  teamavail:
+    build: .
+    container_name: teamavail-app
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount input directory for configuration files
+      - ./input:/app/input:ro
+      # Mount output directory to persist history data
+      - ./output:/app/output
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+
