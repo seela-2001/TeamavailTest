@@ -2,35 +2,41 @@ pipeline {
     agent any
 
     stages {
+
         stage('Checkout') {
             steps {
-                checkout scm
+                echo 'Checking out the code ....'
+                chekout scm
+            }
+        } 
+
+        stage("Stop the container"){
+            steps {
+                sh 'docker compose down || docker-compose down || true'
             }
         }
 
-        stage('Build') {
-            steps {
-                sh '''
-                    if docker compose version >/dev/null 2>&1; then
-                        docker compose build
-                    else
-                        docker-compose build
-                    fi
-                '''
+        stage('Build the image') {
+            steps{
+                sh 'docker compose build --no-cache || docker-compose build --no-cache'
             }
         }
 
-        stage('Run with Docker Compose') {
+        stage('Re-run the container') {
             steps {
-                sh 'scripts/run.sh'
+                sh 'docker compose up -d || docker-compose up -d'
             }
         }
     }
 
     post {
-        always {
-            sh 'scripts/stop.sh || true'
+        success {
+            echo 'Pipeline succeeded! Application is running..'
+        }
+
+        faliure {
+            echo "Pipline failed! Showing logs..."
+            sh 'docker compose logs --tail=50 || docker-compose logs --tail=50 || true'
         }
     }
 }
-
