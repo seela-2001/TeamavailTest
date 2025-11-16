@@ -12,19 +12,19 @@ pipeline {
 
         stage("Stop the container"){
             steps {
-                sh 'docker compose down || docker-compose down || true'
+                sh 'docker compose down || true'
             }
         }
 
         stage('Build the image') {
             steps{
-                sh 'docker compose build --no-cache || docker-compose build --no-cache'
+                sh 'docker compose build --no-cache'
             }
         }
 
         stage('Re-run the container') {
             steps {
-                sh 'docker compose up -d || docker-compose up -d'
+                sh 'docker compose up -d '
             }
         }
     }
@@ -36,7 +36,7 @@ pipeline {
 
         failure {
             echo "Pipline failed! Showing logs..."
-            sh 'docker compose logs --tail=50 || docker-compose logs --tail=50 || true'
+            sh 'docker compose logs --tail=50 || true'
         }
     }
 }
