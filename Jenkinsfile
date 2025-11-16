@@ -34,7 +34,7 @@ pipeline {
             echo 'Pipeline succeeded! Application is running..'
         }
 
-        faliure {
+        failure {
             echo "Pipline failed! Showing logs..."
             sh 'docker compose logs --tail=50 || docker-compose logs --tail=50 || true'
         }
