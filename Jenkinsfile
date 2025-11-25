@@ -5,37 +5,41 @@ pipeline {
 
         stage('Checkout') {
             steps {
-                echo 'Checking out the code ....'
+                echo 'Checking out the code...'
                 checkout scm
             }
-        } 
+        }
 
-        stage("Stop the container"){
+        stage("Stop & Clean Containers") {
             steps {
-                sh 'docker compose down || true'
+                echo 'Stopping and removing old containers, networks, and volumes (for a clean environment)...'
+
+                sh 'docker compose down --remove-orphans || true'
             }
         }
 
-        stage('Build the image') {
-            steps{
-                sh 'docker compose build --no-cache'
+        stage('Build the Image') {
+            steps {
+                echo 'Building image without cache to ensure latest code is used...'
+                sh 'docker compose build --no-cache --force-rm'
             }
         }
 
-        stage('Re-run the container') {
+        stage('Deploy the Container') {
             steps {
-                sh 'docker compose up -d '
+                echo 'Starting new container from the fresh build...'
+                sh 'docker compose up -d --force-recreate'
             }
         }
     }
 
     post {
         success {
-            echo 'Pipeline succeeded! Application is running..'
+            echo '✅ Pipeline succeeded! Application is now running.'
         }
 
         failure {
-            echo "Pipline failed! Showing logs..."
+            echo "❌ Pipline failed! Showing logs for debugging..."
             sh 'docker compose logs --tail=50 || true'
         }
     }
